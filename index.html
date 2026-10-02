@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitApp - Suivi & Programme Fessiers/Volume</title>
+    <!-- Tailwind CSS pour un design moderne et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+
+    <!-- En-tête -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
+        <div class="max-w-md mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-lg font-bold text-brand-500 tracking-tight">🍑 Booty & Strength Builder</h1>
+                <p class="text-xs text-slate-400">Objectif Prise de Volume (1m70 / 63kg)</p>
+            </div>
+            <button onclick="resetData()" class="text-xs text-slate-500 hover:text-red-400 transition" title="Réinitialiser les données">Reset</button>
+        </div>
+    </header>
+
+    <!-- Conteneur Principal -->
+    <main class="max-w-md mx-auto w-full p-4 flex-grow mb-20">
+
+        <!-- Sélection de la séance -->
+        <section id="workout-select-view" class="space-y-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Choisis ta séance du jour</h2>
+                <div class="space-y-3" id="workouts-list">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Historique / Progression rapide -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2">Conseils d'évolution (Surcharge Progressive)</h2>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Si tu valides la fourchette haute des répétitions avec la même charge, l'application te recommandera automatiquement d'augmenter légèrement la charge ou les reps la semaine prochaine pour stimuler la prise de volume sur les fessiers !
+                </p>
+            </div>
+        </section>
+
+        <!-- Vue Session en cours -->
+        <section id="workout-session-view" class="hidden space-y-4">
+            <div class="flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-xl">
+                <button onclick="backToMenu()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg transition font-medium">← Retour</button>
+                <h2 id="current-workout-title" class="font-bold text-brand-500 text-sm">Nom de la séance</h2>
+            </div>
+
+            <!-- Chrono Flottant / Fixe -->
+            <div id="rest-timer-box" class="hidden bg-brand-950/80 border border-brand-500/50 rounded-xl p-3 text-center shadow-lg animate-pulse">
+                <p class="text-xs text-brand-300 uppercase font-semibold">Temps de repos recommandé</p>
+                <div id="timer-display" class="text-3xl font-extrabold text-brand-400 my-1">00:00</div>
+                <button onclick="stopTimer()" class="text-xs bg-brand-600 hover:bg-brand-700 text-white px-3 py-1 rounded-full font-medium transition">Passer le repos</button>
+            </div>
+
+            <!-- Liste des exercices -->
+            <div id="exercises-container" class="space-y-4">
+                <!-- Généré dynamiquement -->
+            </div>
+
+            <button onclick="finishWorkout()" class="w-full bg-gradient-to-r from-brand-600 to-pink-600 hover:from-brand-500 hover:to-pink-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 text-sm">
+                Terminer et sauvegarder la séance 🎉
+            </button>
+        </section>
+
+    </main>
+
+    <!-- Navigation / Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 fixed bottom-0 left-0 right-0 z-30 py-2">
+        <div class="max-w-md mx-auto text-center text-xs text-slate-500">
+            Programme sur-mesure • 3 séances/semaine
+        </div>
+    </footer>
+
+    <!-- Script Logique Application -->
+    <script>
+        // Programme complet orienté fessiers/volume pour 1m70 / 63kg
+        const programData = {
+            s1: {
+                id: "s1",
+                name: "Séance 1 : Bas du Corps (Focus Fessiers & Ischio)",
+                description: "Accent sur la chaîne postérieure et l'hypertrophie fessière.",
+                exercises: [
+                    { id: "s1_ex1", name: "Hip Thrust à la barre", targetReps: "8-12 reps", targetSets: 4, restSec: 90, advice: "Serrer les fessiers 1s en haut, amplitude complète." },
+                    { id: "s1_ex2", name: "RDL (Soulevé de terre roumain haltères/barre)", targetReps: "10-12 reps", targetSets: 3, restSec: 90, advice: "Garder le dos neutre, pousser les fesses vers l'arrière." },
+                    { id: "s1_ex3", name: "Fentes bulgares (avec haltères)", targetReps: "10-12 reps / jambe", targetSets: 3, restSec: 60, advice: "Ppencher légèrement le buste en avant pour cibler les fessiers." },
+                    { id: "s1_ex4", name: "Abductions machine ou élastique", targetReps: "15-20 reps", targetSets: 3, restSec: 45, advice: "Contrôler la descente, brûlage garanti sur le moyen fessier." }
+                ]
+            },
+            s2: {
+                id: "s2",
+                name: "Séance 2 : Haut du Corps (Harmonie & Tonus)",
+                description: "Dos, Épaules, Bras et un peu de gainage pour équilibrer la silhouette.",
+                exercises: [
+                    { id: "s2_ex1", name: "Tirage vertical poulie haute (Lat Pulldown)", targetReps: "10-12 reps", targetSets: 3, restSec: 60, advice: "Sortir la poitrine, tirer avec les coudes vers le bas." },
+                    { id: "s2_ex2", name: "Développé épaule haltères assis", targetReps: "10-12 reps", targetSets: 3, restSec: 60, advice: "Ne pas creuser excessivement le dos." },
+                    { id: "s2_ex3", name: "Rowing haltère unilatéral", targetReps: "10-12 reps", targetSets: 3, restSec: 60, advice: "Garder le buste stable." },
+                    { id: "s2_ex4", name: "Élévations latérales haltères", targetReps: "12-15 reps", targetSets: 3, restSec: 45, advice: "Mouvement fluide, léger pour garder la tension." }
+                ]
+            },
+            s3: {
+                id: "s3",
+                name: "Séance 3 : Bas du Corps (Focus Glutes / Squat & Isolation)",
+                description: "Second focus bas du corps pour maximiser le volume et la rondeur.",
+                exercises: [
+                    { id: "s3_ex1", name: "Squat Goblet avec haltère lourd", targetReps: "8-12 reps", targetSets: 4, restSec: 90, advice: "Descente profonde, genoux ouverts vers l'extérieur." },
+                    { id: "s3_ex2", name: "Hip Thrust unilatéral ou léger", targetReps: "10-12 reps", targetSets: 3, restSec: 60, advice: "Focalisation sur l'isolation de chaque fessier." },
+                    { id: "s3_ex3", name: "Kickbacks poulie basse", targetReps: "12-15 reps / jambe", targetSets: 3, restSec: 45, advice: "Pousser vers l'arrière et légèrement en diagonale." },
+                    { id: "s3_ex4", name: "Good Morning ou Leg Curl ischio", targetReps: "12-15 reps", targetSets: 3, restSec: 60, advice: "Étirement contrôlé des ischio-jambiers." }
+                ]
+            }
+        };
+
+        let currentWorkout = null;
+        let timerInterval = null;
+        let logs = JSON.parse(localStorage.getItem('fitapp_logs')) || {};
+        let historicalData = JSON.parse(localStorage.getItem('fitapp_history')) || {};
+
+        // Initialisation de l'interface principale
+        function initApp() {
+            const listContainer = document.getElementById('workouts-list');
+            listContainer.innerHTML = '';
+
+            Object.values(programData).forEach(w => {
+                listContainer.innerHTML += `
+                    <div onclick="startWorkout('${w.id}')" class="bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 rounded-xl p-4 cursor-pointer transition transform active:scale-98 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-200 text-sm">${w.name}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">${w.description}</p>
+                        </div>
+                        <span class="text-brand-500 font-bold text-lg">→</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Démarrer une séance
+        function startWorkout(workoutId) {
+            currentWorkout = programData[workoutId];
+            document.getElementById('current-workout-title').innerText = currentWorkout.name;
+            
+            document.getElementById('workout-select-view').classList.add('hidden');
+            document.getElementById('workout-session-view').classList.remove('hidden');
+
+            renderExercises();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Retour au menu
+        function backToMenu() {
+            stopTimer();
+            currentWorkout = null;
+            document.getElementById('workout-session-view').classList.add('hidden');
+            document.getElementById('workout-select-view').classList.remove('hidden');
+        }
+
+        // Afficher les exercices de la séance
+        function renderExercises() {
+            const container = document.getElementById('exercises-container');
+            container.innerHTML = '';
+
+            currentWorkout.exercises.forEach((ex, exIndex) => {
+                // Récupérer les suggestions intelligentes de surcharge progressive
+                let suggestionText = suggestProgression(ex.id, ex.targetReps);
+
+                let setsHtml = '';
+                for (let s = 1; s <= ex.targetSets; s++) {
+                    const key = `${ex.id}_s${s}`;
+                    const savedWeight = logs[key]?.weight || '';
+                    const savedReps = logs[key]?.reps || '';
+
+                    setsHtml += `
+                        <div class="flex items-center space-x-2 bg-slate-900/80 p-2 rounded-lg border border-slate-800">
+                            <span class="text-xs font-bold text-slate-400 w-10">Série ${s}</span>
+                            <div class="flex-1 flex items-center space-x-1">
+                                <input type="number" step="0.5" id="${key}_w" value="${savedWeight}" placeholder="Poids (kg)" onchange="saveSetData('${ex.id}', ${s}, ${ex.restSec})" class="w-full bg-slate-800 border border-slate-700 text-slate-100 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-brand-500">
+                                <span class="text-xs text-slate-500">kg</span>
+                            </div>
+                            <div class="flex-1 flex items-center space-x-1">
+                                <input type="number" id="${key}_r" value="${savedReps}" placeholder="Reps" onchange="saveSetData('${ex.id}', ${s}, ${ex.restSec})" class="w-full bg-slate-800 border border-slate-700 text-slate-100 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-brand-500">
+                                <span class="text-xs text-slate-500">reps</span>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-slate-100 text-sm">${ex.name}</h3>
+                                <p class="text-xs text-brand-400 font-medium">Objectif : ${ex.targetReps} (${ex.targetSets} séries)</p>
+                            </div>
+                            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-md">Repos : ${ex.restSec}s</span>
+                        </div>
+                        <p class="text-xs text-slate-400 italic bg-slate-950/50 p-2 rounded-lg border border-slate-800/50">💡 Conseil : ${ex.advice}</p>
+                        ${suggestionText ? `<div class="text-xs bg-pink-950/40 text-pink-300 border border-pink-500/30 p-2 rounded-lg font-medium">📈 Surcharge conseillée : ${suggestionText}</div>` : ''}
+                        <div class="space-y-2">
+                            ${setsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Sauvegarde des données en temps réel + Déclenchement Chrono
+        function saveSetData(exerciseId, setNum, restSec) {
+            const key = `${exerciseId}_s${setNum}`;
+            const weight = document.getElementById(`${key}_w`).value;
+            const reps = document.getElementById(`${key}_r`).value;
+
+            if (!logs[exerciseId]) logs[exerciseId] = {};
+            logs[key] = { weight, reps };
+            localStorage.setItem('fitapp_logs', JSON.stringify(logs));
+
+            // Dès qu'on renseigne les infos de la série, on lance le chrono de repos !
+            if (weight || reps) {
+                startTimer(restSec);
+            }
+        }
+
+        // Logique de Surcharge Progressive Intelligente
+        function suggestProgression(exerciseId, targetRepsRange) {
+            const history = historicalData[exerciseId];
+            if (!history || history.length === 0) return null;
+
+            const lastSession = history[history.length - 1];
+            // Analyser la fourchette (ex: "8-12 reps" -> max 12)
+            const parts = targetRepsRange.split('-');
+            const maxTargetReps = parseInt(parts[1]) || 12;
+
+            // Vérifier si sur la dernière séance, toutes les séries ont atteint le max des reps
+            let allRepsReachedMax = true;
+            let lastWeight = 0;
+
+            for (let s = 1; s <= 4; s++) {
+                const setLog = lastSession[`s${s}`];
+                if (setLog) {
+                    lastWeight = parseFloat(setLog.weight) || lastWeight;
+                    if (parseInt(setLog.reps) < maxTargetReps) {
+                        allRepsReachedMax = false;
+                    }
+                }
+            }
+
+            if (allRepsReachedMax && lastWeight > 0) {
+                return `Augmente la charge de 1 à 2.5 kg sur cet exercice (poids précédent : ${lastWeight} kg).`;
+            } else if (lastWeight > 0) {
+                return `Garde le poids de ${lastWeight} kg et essaie d'ajouter 1 à 2 répétitions.`;
+            }
+            return null;
+        }
+
+        // Chronomètre de repos interactif
+        function startTimer(durationInSeconds) {
+            stopTimer();
+            const timerBox = document.getElementById('rest-timer-box');
+            const timerDisplay = document.getElementById('timer-display');
+            timerBox.classList.remove('hidden');
+
+            let timeLeft = durationInSeconds;
+            updateTimerDisplay(timeLeft, timerDisplay);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(timeLeft, timerDisplay);
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    // Alerte visuelle / sonore subtile
+                    timerDisplay.innerText = "C'est reparti ! 💪";
+                    setTimeout(() => timerBox.classList.add('hidden'), 3000);
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay(seconds, element) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            element.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            document.getElementById('rest-timer-box').classList.add('hidden');
+        }
+
+        // Terminer la séance et archiver pour la surcharge progressive
+        function finishWorkout() {
+            if (!currentWorkout) return;
+
+            // Enregistrer dans l'historique par exercice
+            currentWorkout.exercises.forEach(ex => {
+                if (!historicalData[ex.id]) historicalData[ex.id] = [];
+                let exerciseSessionLog = {};
+                for (let s = 1; s <= ex.targetSets; s++) {
+                    const key = `${ex.id}_s${s}`;
+                    if (logs[key]) {
+                        exerciseSessionLog[`s${s}`] = logs[key];
+                    }
+                }
+                if (Object.keys(exerciseSessionLog).length > 0) {
+                    historicalData[ex.id].push(exerciseSessionLog);
+                }
+            });
+
+            localStorage.setItem('fitapp_history', JSON.stringify(historicalData));
+            alert("Séance enregistrée avec succès ! Tes charges et reps sont sauvegardées pour la prochaine fois.");
+            backToMenu();
+        }
+
+        // Réinitialiser
+        function resetData() {
+            if (confirm("Veux-tu vraiment réinitialiser toutes les données ?")) {
+                localStorage.clear();
+                logs = {};
+                historicalData = {};
+                alert("Données remises à zéro.");
+                initApp();
+            }
+        }
+
+        // Lancer l'app au chargement
+        window.onload = initApp;
+    </script>
+</body>
+</html>
